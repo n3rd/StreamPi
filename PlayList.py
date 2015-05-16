@@ -1,17 +1,27 @@
 #!/usr/local/bin/python
 
+import os
 import requests
+from ConfigParser import SafeConfigParser
 
 class PlayList:
     
-    token = '0a72fd75ad2d3c2a66c379e327'
+    token = ''
     
     __stations = [ ]
     
     def __init__(self):
-        self.__process_stations(self.__get_stations())
-    
-    def __get_stations(self):
+        parser = SafeConfigParser()
+        parser.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'streampi.ini'))
+        self.token = parser.get('dirble', 'apikey')
+        
+        try:
+            self.__process_stations(self.__get_stations())
+        except:
+            print 'could not get stations from drible api, are you using a valid apikey?'
+            raise
+            
+    def __get_stations(self):        
         url = 'http://api.dirble.com/v2/countries/nl/stations?all=1&token={}'.format(self.token)
         r = requests.get(url)
         return r.json()
